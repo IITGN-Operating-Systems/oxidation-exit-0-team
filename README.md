@@ -20,8 +20,7 @@ To use these dependencies, we have to use older nightly versions of Rust.
 
 ## Can we use latest Rust nightly?
 
-You are free to port the code over to newer versions, and will recieve significant 
-bonus points for it. We will try to help you if you get stuck.  
+You are free to port the code over to newer versions. We will try to help you if you get stuck.  
 But sadly, this endeavour will not be considered for deadline extension. ¯\\\_(ツ)\_/¯
 
 ## Acknowledgement
