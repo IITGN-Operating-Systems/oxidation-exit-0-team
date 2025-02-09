@@ -51,7 +51,34 @@ fn main() {
     use std::io::{self, BufReader};
 
     let opt = Opt::from_args();
-    let mut port = serial::open(&opt.tty_path).expect("path points to invalid TTY");
+    let mut port = serial::open(&opt.tty_path).expect("Failed to open serial port");
 
-    // FIXME: Implement the `ttywrite` utility.
+    // Create and configure serial port settings
+    let mut settings = port.read_settings().expect("failed to get settings");
+    settings.set_baud_rate(opt.baud_rate).expect("Failed to set baud rate");
+    settings.set_char_size(opt.char_width); 
+    settings.set_stop_bits(opt.stop_bits);
+    settings.set_flow_control(opt.flow_control); 
+    port.set_timeout(Duration::from_secs(opt.timeout)).expect("failed to set timeout");; 
+    port.write_settings(&settings).expect("failed to write settings");
+
+    // Handle input source
+    let mut input: Box<dyn io::Read> = match opt.input {
+        Some(path) => Box::new(File::open(path).expect("Failed to open input file")),
+        None => Box::new(io::stdin()),
+    };
+
+    // Handle transmission mode
+    if opt.raw {
+        let bytes_written = io::copy(&mut input, &mut port).expect("Failed to write data");
+        println!("wrote {} bytes", bytes_written);
+    } else {
+        let progress = |p| println!("Progress: {:?}", p);
+        let bytes_written = Xmodem::transmit_with_progress(
+            &mut *input,
+            &mut port,
+            progress)
+            .expect("XMODEM transmission failed");
+        println!("wrote {} bytes", bytes_written);
+    }
 }
