@@ -2,36 +2,38 @@ ROOT := $(shell git rev-parse --show-toplevel)
 
 KERN := kernel
 TARGET := target/aarch64-unknown-none/release/${KERN}
-OBJCPY := cargo objcopy -- --strip-all -O binary
+TEST_TARGET := aarch64-unknown-none
+OBJCPY := cargo objcopy --bin ${KERN} -- --strip-all -O binary
 TTY_PATH := /dev/ttyUSB0
 
 .PHONY: all build qemu transmit objdump nm check clean install test
 
-all: build
+all: bin
 
-build:
-	@echo "+ Building build/$(KERN).elf [xbuild/$@]"
-	@cargo xbuild --release
+bin:
+	@mkdir -p build
+	cargo objcopy -- --strip-all -O binary build/$(KERN).bin
+
+check:
+	@cargo check
+
+elf:
+	@cargo build --release
 	@mkdir -p build
 	@cp -f $(TARGET) build/$(KERN).elf
 
-	@echo "+ Building build/$(KERN).bin [objcopy]"
-	@$(OBJCPY) $(TARGET) build/$(KERN).bin
-
-check:
-	@cargo xcheck
-
-qemu: build
+qemu: bin
 	./qemu.sh build/$(KERN).bin
 
-transmit: build
+transmit: bin
 	@echo "+ Transmitting build/$(KERN).bin to $(TTY_PATH)"
 	ttywrite -i build/$(KERN).bin $(TTY_PATH)
+	screen $(TTY_PATH) 115200
 
-objdump: build
-	cargo objdump -- -disassemble -no-show-raw-insn -print-imm-hex build/$(KERN).elf
+objdump:
+	cargo objdump --release -- --disassemble --no-show-raw-insn
 
-nm: build
+nm: elf
 	cargo nm build/$(KERN).elf
 
 clean:
@@ -43,4 +45,4 @@ install: build
 	@$(ROOT)/bin/install-kernel.py build/$(KERN).elf
 
 test:
-	cargo test --target=$(shell $(ROOT)/bin/get-host-target.sh)
+	cargo test -Z build-std --target=$(TEST_TARGET)

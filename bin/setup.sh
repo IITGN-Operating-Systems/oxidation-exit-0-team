@@ -12,7 +12,7 @@ git config --global user.email "youremail@yourdomain.com"
 TOP=$(git rev-parse --show-toplevel)
 BIN=$TOP/bin
 DEP=$TOP/.dep
-VER=nightly-2019-07-01
+VER=nightly-2025-01-28
 PROJ_PKG=(build-essential
      python3
      socat
