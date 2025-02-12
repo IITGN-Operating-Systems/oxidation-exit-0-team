@@ -1,0 +1,19 @@
+[build]
+target = "aarch64-unknown-none"
+
+[target.aarch64-unknown-none]
+# runner = "./qemu.sh"
+runner = "gdb-multiarch -command=../ext/debug/debug.gdb"
+rustflags = [
+    "-C", "target-cpu=cortex-a53",
+    "-C", "link-arg=--script=.cargo/layout.ld",
+    "-C", "link-arg=--no-dynamic-linker",
+
+    # # link to libsd.a
+    # "-C", "link-arg=-L.cargo",
+    # "-C", "link-arg=-lsd",
+]
+
+[unstable]
+build-std = ["compiler_builtins", "alloc", "core"]
+build-std-features = ["compiler-builtins-mem"]
