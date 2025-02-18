@@ -1,13 +1,11 @@
 # Subphase B
 
 ## 1. Why can’t you write to CLO or CHI? (restricted-reads)
-
-- The BCM2837 documentation says that CLO and CHI are read-only registers.  
-- In Rust, we use `ReadVolatile<u32>` for these registers. This ensures that only reading is allowed and writing is not possible.
+### The BCM2837 documentation states that the CLO and CHI registers are read-only. Our code enforces this property. How?
+The BCM2837 documentation specifies that CLO and CHI are read-only registers, meaning that they cannot be written to. In our code, we enforce this restriction by using the `ReadVolatile<u32>` type for these registers. This type ensures that the registers are only read from and prevents any write operations.
 
 ## 2. What prevents us from writing to CLO or CHI?
-
-The `ReadVolatile<u32>` type is used for these registers, which means Rust will not allow us to call `.write()` on them. If we try, the compiler will give an error.
+The use of `ReadVolatile<u32>` for these registers is what prevents writing to them. In Rust, this type is designed to allow only reading, so if we attempt to call a `.write()` method on them, the compiler will generate an error, ensuring that no writes are performed.
 
 # Subphase E
 
