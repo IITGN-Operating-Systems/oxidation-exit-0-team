@@ -12,12 +12,12 @@ pub mod console;
 pub mod mutex;
 pub mod shell;
 
+use shell::shell;
 use console::kprintln;
 
-// FIXME: You need to add dependencies here to
-// test your drivers (Phase 2). Add them as needed.
-
-fn kmain() -> ! {
-    // FIXME: Start the shell.
-    unimplemented!()
+/// The entry point of the kernel.
+#[no_mangle]
+pub extern "C" fn kmain() -> ! {
+    kprintln!("Starting kernel shell...");
+    shell("> "); // Start the shell with a simple prompt
 }
